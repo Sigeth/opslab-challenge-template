@@ -1,6 +1,6 @@
 # opslab challenge template
 
-Start here to write a challenge for opslab (working name). A challenge is a standalone repository: the platform installs it from a catalog, runs it in an isolated environment for each student, and checks the tasks automatically.
+Start here to write a challenge for opslab (working name). A challenge is a directory with a `challenge.yaml`: either a repository of its own (this template), or one directory of a repository holding several challenges, like the [official challenges](https://github.com/Sigeth/opslab-challenges). The platform installs it from a catalog, runs it in an isolated environment for each student, and checks the tasks automatically.
 
 ## Layout
 
