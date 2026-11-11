@@ -6,6 +6,7 @@ Start here to write a challenge for opslab (working name). A challenge is a stan
 
 ```
 challenge.yaml        manifest: machines, access, tasks and their checks
+images/<machine>/     Dockerfile of each machine image (minimal, unprivileged user)
 instructions/en.md    what the student reads (one file per language)
 setup/                scripts run once when an instance starts (break things here)
 solution/             reference solution, for testing and for teachers (never shown to students)
@@ -26,7 +27,17 @@ Pick the lightest runtime that can host the challenge. The cluster admin sees wh
 
 Only `pod` runs today; the other runtimes come with later platform versions.
 
-**`pod` machines** run as UID/GID 1000 without any privilege (Pod Security "restricted"): no root, no `sudo`, no package installs. Pick an image that works for that user, such as `ubuntu` (user `ubuntu`, home `/home/ubuntu`), or build one. `setup/` scripts and checks run as that user too. The container gets a TTY, so an image whose default command is a shell stays up; services can be started in the background by a setup script.
+**`pod` machines** run as UID/GID 1000 without any privilege (Pod Security "restricted"): no root, no `sudo`, no package installs. `setup/` scripts and checks run as that user too. The container gets a TTY, so an image whose default command is a shell stays up; services can be started in the background by a setup script.
+
+## Machine images
+
+Each machine image is built from `images/<machine>/Dockerfile` and published with the challenge. Students see how it is built, so make it an example of good practice:
+
+- **An unprivileged user and group of its own:** `student`, UID/GID 1000, with a home directory and no extra groups. End with `USER 1000:1000`. Never rely on `root`, or on a distribution's default user that belongs to `sudo` or `adm`.
+- **Only the tools the challenge needs.** Start from a small base (`alpine`, `busybox`, a `-slim` image) and add packages one by one. No `sudo`, `systemd`/`systemctl`, compilers or editors the tasks do not use: every extra binary is attack surface, and a distraction.
+- **Pin the base image by digest**, and tag the machine image with the challenge version.
+
+`opslab challenge images .` lists the images and the ones the challenge builds. The workspace dev loop builds and loads them into the dev cluster.
 
 ## Checks
 

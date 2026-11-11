@@ -21,10 +21,10 @@ spec:
 
   machines:
     - name: box
-      # pod machines run as UID/GID 1000 without privileges: use an image
-      # with a user 1000 (ubuntu has "ubuntu", home /home/ubuntu).
       runtime: pod # pod | sysbox | vcluster | vm
-      image: docker.io/library/ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+      # Built from images/box/Dockerfile: a minimal image whose unprivileged
+      # "student" user (1000:1000) is the one pod machines run as.
+      image: ghcr.io/your-account/my-challenge/box:0.1.0
       resources: {cpu: 100m, memory: 128Mi}
       setup: [setup/setup.sh] # run once when the instance starts, as the machine's user
 
@@ -40,10 +40,10 @@ spec:
         - {text: "Look at the permission bits with `ls -l`.", cost: 2}
       check:
         machine: box
-        file: {path: /home/ubuntu/app/token, mode: "0600"}
+        file: {path: /home/student/app/token, mode: "0600"}
     - id: app-not-world-writable
       title: Nothing in ~/app is writable by other users
       points: 5
       check:
         machine: box
-        shell: {run: 'test -d /home/ubuntu/app && test -z "$(find /home/ubuntu/app -perm -o+w)"'}
+        shell: {run: 'test -d /home/student/app && test -z "$(find /home/student/app -perm -o+w)"'}
