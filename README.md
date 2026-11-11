@@ -7,7 +7,7 @@ Start here to write a challenge for opslab (working name). A challenge is a stan
 ```
 challenge.yaml        manifest: machines, access, tasks and their checks
 instructions/en.md    what the student reads (one file per language)
-setup/                scripts run once as root when an instance starts (break things here)
+setup/                scripts run once when an instance starts (break things here)
 solution/             reference solution, for testing and for teachers (never shown to students)
 ```
 
@@ -23,6 +23,10 @@ Pick the lightest runtime that can host the challenge. The cluster admin sees wh
 | `sysbox` | A system container with systemd, Docker or Podman inside | Services, container engines |
 | `vcluster` | Admin of a virtual Kubernetes cluster | RBAC, NetworkPolicy, Pod Security, workloads |
 | `vm` | A full virtual machine (KubeVirt) | Kernel, firewall, sshd, auditd, container escapes, kubeadm |
+
+Only `pod` runs today; the other runtimes come with later platform versions.
+
+**`pod` machines** run as UID/GID 1000 without any privilege (Pod Security "restricted"): no root, no `sudo`, no package installs. Pick an image that works for that user, such as `ubuntu` (user `ubuntu`, home `/home/ubuntu`), or build one. `setup/` scripts and checks run as that user too. The container gets a TTY, so an image whose default command is a shell stays up; services can be started in the background by a setup script.
 
 ## Checks
 
@@ -49,6 +53,12 @@ Need logic beyond these? Set `spec.validation.checkerImage` to a custom checker 
 
 ```sh
 opslab challenge lint .      # validate (same rules as the platform)
+```
+
+Try it on a local platform (the workspace dev cluster):
+
+```sh
+opslab challenge manifest . | kubectl apply -f -   # install it, unsigned (development only)
 ```
 
 Coming next: `opslab challenge test` (checks fail, solution, checks pass), and `push --sign` to publish to a catalog.

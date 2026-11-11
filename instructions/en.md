@@ -1,10 +1,10 @@
 # Remove a world-writable secret
 
-The application in `/opt/app` reads its API token from `/opt/app/token`. Every user on the machine can read **and modify** it.
+The application in `~/app` reads its API token from `~/app/token`. Every user on the machine can read **and modify** it, and anyone can add files to `~/app`.
 
-Fix the file so that:
+Fix it so that:
 
-1. only its owner can read and write it,
-2. its owner is the `app` user.
+1. only you can read and write the token,
+2. nothing in `~/app` is writable by other users.
 
-Press **Check** when you are done.
+Press **Check my work** when you are done.

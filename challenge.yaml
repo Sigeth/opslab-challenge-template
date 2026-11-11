@@ -21,27 +21,29 @@ spec:
 
   machines:
     - name: box
+      # pod machines run as UID/GID 1000 without privileges: use an image
+      # with a user 1000 (ubuntu has "ubuntu", home /home/ubuntu).
       runtime: pod # pod | sysbox | vcluster | vm
-      image: docker.io/library/debian:13-slim # pin it by digest before publishing
-      resources: {cpu: 250m, memory: 128Mi}
-      setup: [setup/setup.sh] # run once as root when the instance starts
+      image: docker.io/library/ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+      resources: {cpu: 100m, memory: 128Mi}
+      setup: [setup/setup.sh] # run once when the instance starts, as the machine's user
 
   access:
     terminals:
       - {machine: box, label: box}
 
   tasks:
-    - id: token-not-world-readable
-      title: Only the owner can read /opt/app/token
+    - id: token-private
+      title: Only the owner can read and write ~/app/token
       points: 10
       hints:
         - {text: "Look at the permission bits with `ls -l`.", cost: 2}
       check:
         machine: box
-        file: {path: /opt/app/token, mode: "0600"}
-    - id: token-owned-by-app
-      title: /opt/app/token belongs to the app user
+        file: {path: /home/ubuntu/app/token, mode: "0600"}
+    - id: app-not-world-writable
+      title: Nothing in ~/app is writable by other users
       points: 5
       check:
         machine: box
-        file: {path: /opt/app/token, owner: app}
+        shell: {run: 'test -d /home/ubuntu/app && test -z "$(find /home/ubuntu/app -perm -o+w)"'}
