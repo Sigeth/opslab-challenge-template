@@ -1,5 +1,9 @@
 name: ci
 
+# Pipelines live in github.com/Sigeth/opslab-ci (Dagger). Run them locally with:
+#   dagger -m github.com/Sigeth/opslab-ci@v0.2.0 call challenge-lint --source=. --cli-version=v0.2.0
+#   dagger -m github.com/Sigeth/opslab-ci@v0.2.0 call image --source=images/box
+
 on:
   push:
     branches: [main]
@@ -18,4 +22,16 @@ jobs:
           version: "0.21.11"
           module: github.com/Sigeth/opslab-ci@v0.2.0
           verb: call
-          args: challenge-lint --source=.
+          args: challenge-lint --source=. --cli-version=v0.2.0
+
+  # The machine images must build: one step per images/<machine>/Dockerfile.
+  images:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dagger/dagger-for-github@v8.4.1
+        with:
+          version: "0.21.11"
+          module: github.com/Sigeth/opslab-ci@v0.2.0
+          verb: call
+          args: image --source=images/box
