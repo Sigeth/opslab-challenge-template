@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Sigeth/opslab-core-go/v0.1.0/schema/challenge-package.schema.json
+#
+# Template challenge: replace every value. Reference of every field:
+# https://github.com/Sigeth/opslab-core-go/tree/main/api/v1alpha1/challengepackage_types.go
+apiVersion: opslab.io/v1alpha1
+kind: ChallengePackage
+metadata:
+  name: my-challenge # lowercase letters, digits and '-'
+  version: 0.1.0 # semver: bump it for every release
+spec:
+  title: Remove a world-writable secret
+  summary: An application stores its API token in a file anyone can read and modify. Lock it down.
+  category: linux-hardening # linux-hardening | containers | kubernetes
+  difficulty: easy # easy | medium | hard | insane
+  estimatedTime: 15m
+  tags: [permissions]
+  authors:
+    - name: Your Name
+      url: https://github.com/your-account
+  license: MIT
+
+  machines:
+    - name: box
+      runtime: pod # pod | sysbox | vcluster | vm
+      image: docker.io/library/debian:13-slim # pin it by digest before publishing
+      resources: {cpu: 250m, memory: 128Mi}
+      setup: [setup/setup.sh] # run once as root when the instance starts
+
+  access:
+    terminals:
+      - {machine: box, label: box}
+
+  tasks:
+    - id: token-not-world-readable
+      title: Only the owner can read /opt/app/token
+      points: 10
+      hints:
+        - {text: "Look at the permission bits with `ls -l`.", cost: 2}
+      check:
+        machine: box
+        file: {path: /opt/app/token, mode: "0600"}
+    - id: token-owned-by-app
+      title: /opt/app/token belongs to the app user
+      points: 5
+      check:
+        machine: box
+        file: {path: /opt/app/token, owner: app}
