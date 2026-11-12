@@ -47,11 +47,13 @@ Each task has one check, evaluated **from outside** the student's machines:
 |---|---|
 | `shell` | a command exits with `expectExit` (default 0) and its output matches `expectOutput` |
 | `file` | a file exists (or not) with the expected `mode`, `owner` and content (`contains` / `notContains`) |
-| `sshLogin` | logging in as `user` is `allowed` or `denied` (vm, sysbox) |
+| `sshLogin` | logging in as `user` is `allowed` or `denied` (vm). The checker presents the student's key (or `password`), so for another user, install the student's public key for that user in your setup (`cp /home/student/.ssh/authorized_keys /root/.ssh/`). `denied` needs a running SSH server that refuses the login. |
 | `port` | a port is `open` or `closed` |
 | `http` | a request returns `expectStatus` and a body matching `expectBody` |
 | `kubeCEL` | a CEL expression holds for `all`, `any` or `none` of the selected objects (vcluster) |
 | `goss` | a [goss](https://github.com/goss-org/goss) spec passes |
+
+On `vm` machines, `shell` and `file` checks run over SSH, as the check's `user` (default `root`) through `sudo`. The student is `student` (UID 1000) with passwordless `sudo`; setup scripts run as root.
 
 Good checks:
 - **Test behavior, not files.** "SSH as root is denied" beats "sshd_config contains PermitRootLogin no", because a student with root can fake a file but not a behavior.
